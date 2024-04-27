@@ -17,23 +17,36 @@ export const modalSubmitInteraction: SavedInteractionType = {
          */
         const modal = modals.get(interaction.customId);
 
-        // Try to forward modal submit interaction response prompt
-        await modal.execute(interaction).catch((error: Error) => {
-            // Send notifications
-            sendNotification(
-                {
-                    consoleOutput: `Error handling submission of modal '${interaction.customId}'`,
-                    content: `The submission of the modal \`\`${interaction.customId}\`\` could not be handled!`,
-                    error,
-                    owner: interaction.client.application.owner,
-                    type: "error",
-                },
-                {
-                    content:
-                        PredefinedInteractionErrorResponse.errorHandlingInteraction,
-                    interaction,
-                },
-            );
-        });
+        // Check if modal was found
+        if (modal) {
+            // Try to forward modal submit interaction response prompt
+            await modal.execute(interaction).catch((error: Error) => {
+                // Send notifications
+                sendNotification(
+                    {
+                        consoleOutput: `Error handling submission of modal '${interaction.customId}'`,
+                        content: `The submission of the modal \`\`${interaction.customId}\`\` could not be handled!`,
+                        error,
+                        owner: interaction.client.application.owner,
+                        type: "error",
+                    },
+                    {
+                        content:
+                            PredefinedInteractionErrorResponse.errorHandlingInteraction,
+                        interaction,
+                    },
+                );
+                // TODO: Interaction Error Response
+            });
+        } else {
+            sendNotification({
+                consoleOutput: `No file found for modal '${interaction.customId}'`,
+                content: `The file handling the modal '${interaction.customId}' does not exist!`,
+                interaction,
+                owner: interaction.client.application.owner,
+                type: "error",
+            });
+            // TODO: Interaction Error Response
+        }
     },
 };

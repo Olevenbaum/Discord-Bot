@@ -25,24 +25,34 @@ export const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     applicationCommand.type ===
                     ApplicationCommandType.ChatInput,
             )
-            .get(interaction.commandName) as SavedChatInputCommand;
+            .get(interaction.commandName) as SavedChatInputCommand | undefined;
 
-        // Try to forward chat input command autocomplete interaction response prompt
-        await chatInputCommand
-            .autocomplete(interaction)
-            .catch(async (error) => {
-                // Send notifications
-                sendNotification(
-                    {
+        // Check if chat input command was found
+        if (chatInputCommand) {
+            // Try to forward chat input command autocomplete interaction response prompt
+            await chatInputCommand
+                .autocomplete(interaction)
+                .catch(async (error) => {
+                    // Send notifications
+                    sendNotification({
                         consoleOutput: `Error handling chat input command autocomplete of chat input command '${interaction.commandName}'`,
                         content: `There was an error handling the autocomplete interaction of the chat input command \`\`${interaction.commandName}\`\`!`,
                         error,
                         interaction,
                         owner: interaction.client.application.owner,
                         type: "error",
-                    },
-                    null,
-                );
+                    });
+                    // TODO: Interaction Error Response
+                });
+        } else {
+            sendNotification({
+                consoleOutput: `No file found for chat command '${interaction.commandName}'`,
+                content: `The file handling the chat input command '${interaction.commandName}' does not exist!`,
+                interaction,
+                owner: interaction.client.application.owner,
+                type: "error",
             });
+            // TODO: Interaction Error Response
+        }
     },
 };

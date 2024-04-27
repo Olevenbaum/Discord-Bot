@@ -24,26 +24,41 @@ export const messageComponentInteraction: SavedMessageComponentType = {
          */
         const messageComponent = components.get(
             interaction.customId.replace(/[0-9]/g, "") + `(${this.type})`,
-        ) as SavedMessageComponent;
+        ) as SavedMessageComponent | undefined;
 
-        // Try to forward message component interaction response prompt
-        await messageComponent.execute(interaction).catch((error: Error) => {
-            // Send notifications
-            sendNotification(
-                {
-                    consoleOutput: `Error handling interaction with message component '${interaction.customId}'`,
-                    content: `There was an error handling the interaction with the message component \`\`${interaction.customId}\`\`!`,
-                    error: error,
-                    interaction,
-                    owner: interaction.client.application.owner,
-                    type: "error",
-                },
-                {
-                    content:
-                        PredefinedInteractionErrorResponse.errorHandlingInteraction,
-                    interaction,
-                },
-            );
-        });
+        // Check if message component was found
+        if (messageComponent) {
+            // Try to forward message component interaction response prompt
+            await messageComponent
+                .execute(interaction)
+                .catch((error: Error) => {
+                    // Send notifications
+                    sendNotification(
+                        {
+                            consoleOutput: `Error handling interaction with message component '${interaction.customId}'`,
+                            content: `There was an error handling the interaction with the message component \`\`${interaction.customId}\`\`!`,
+                            error: error,
+                            interaction,
+                            owner: interaction.client.application.owner,
+                            type: "error",
+                        },
+                        {
+                            content:
+                                PredefinedInteractionErrorResponse.errorHandlingInteraction,
+                            interaction,
+                        },
+                    );
+                    // TODO: Interaction Error Response
+                });
+        } else {
+            sendNotification({
+                consoleOutput: `No file found for message component '${interaction.customId}'`,
+                content: `The file handling the message component '${interaction.customId}' does not exist!`,
+                interaction,
+                owner: interaction.client.application.owner,
+                type: "error",
+            });
+            // TODO: Interaction Error Response
+        }
     },
 };

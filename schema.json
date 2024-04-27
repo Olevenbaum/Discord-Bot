@@ -1,0 +1,57 @@
+{
+    "additionalProperties": false,
+    "description": "Configuration data to configure the application to fit your bot",
+    "$id": "./configuration.json",
+    "properties": {
+        "applications": {
+            "description": "",
+            "items": {
+                "description": "",
+                "properties": {
+                    "applicationId": {
+                        "description": "",
+                        "pattern": "^([0-9]{18})$",
+                        "type": "string"
+                    },
+                    "publicKey": { "description": "", "type": "string" },
+                    "token": {
+                        "description": "",
+                        "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+                        "type": "string"
+                    }
+                },
+                "required": ["applicationId", "publicKey", "token"],
+                "type": "object"
+            },
+            "minItems": 1,
+            "properties": {
+                "applicationId": {
+                    "description": "",
+                    "pattern": "^([0-9]{18})$",
+                    "type": "string"
+                },
+                "publicKey": { "description": "", "type": "string" },
+                "token": {
+                    "description": "",
+                    "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+                    "type": "string"
+                }
+            },
+            "required": ["applicationId", "publicKey", "token"],
+            "type": ["array", "object"],
+            "uniqueItems": true
+        },
+        "enableBlockedUsers": { "description": "", "type": "boolean" },
+        "enableBotInteraction": { "description": "", "type": "boolean" },
+        "enableBotIteration": { "description": "", "type": "boolean" },
+        "notifications": {
+            "description": "",
+            "properties": {},
+            "type": ["boolean", "object"]
+        }
+    },
+    "required": ["applications"],
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Configuration",
+    "type": "object"
+}

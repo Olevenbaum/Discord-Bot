@@ -39,6 +39,7 @@ export const messageComponentInteraction: SavedInteractionType = {
                             interaction,
                         },
                     );
+                    // TODO: Interaction Error Response
                 });
         } else {
             // Send notifications
@@ -56,6 +57,7 @@ export const messageComponentInteraction: SavedInteractionType = {
                     interaction,
                 },
             );
+            // TODO: Interaction Error Response
         }
     },
 };

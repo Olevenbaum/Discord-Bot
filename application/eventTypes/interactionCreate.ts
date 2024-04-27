@@ -76,13 +76,14 @@ export const eventType: SavedEventType = {
                                 interaction,
                             },
                         );
+                        // TODO: Interaction Error Response
                     });
             } else {
                 // Send notification
                 sendNotification(
                     {
                         consoleOutput: `No file found for interaction type '${interaction.type}'`,
-                        content: `Unable to find interaction type matching ${interaction.type} in global variable`,
+                        content: `The file handling the interaction type ${interaction.type} does not exist!`,
                         interaction,
                         owner: interaction.client.application.owner,
                         type: "error",
@@ -93,6 +94,7 @@ export const eventType: SavedEventType = {
                         interaction,
                     },
                 );
+                // TODO: Interaction Error Response
             }
         }
     },

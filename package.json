@@ -11,12 +11,12 @@
     "dependencies": {
         "@types/node": "^20.10.1",
         "discord.js": "^14.14.1",
-        "json": "^11.0.0"
+        "json": "^11.0.0",
+        "ts-node": "^10.9.2"
     },
     "devDependencies": {
-        "@tsconfig/node20": "^20.1.2",
-        "ts-node": "^10.9.1",
-        "typescript": "^5.3.2"
+        "@tsconfig/node21": "^21.0.1",
+        "typescript": "^5.3.3"
     },
     "homepage": "https://github.com/Olevenbaum/Discord-Bot-Template",
     "icon": "resources/images/profilepicture.png",
@@ -38,9 +38,9 @@
     },
     "scripts": {
         "resetApplicationCommands": "node management/resetApplicationCommands.js",
-        "start": "node application/application.js",
+        "start": "ts-node .",
         "watch": "tsc -w"
     },
-    "type": "module",
+    "type": "commonjs",
     "version": "1.0"
 }

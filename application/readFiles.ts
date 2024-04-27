@@ -20,7 +20,7 @@ export default (client: Client) => {
     // Send notifications
     sendNotification({
         content: "Creating interaction types collection...",
-        owner: client.application.owner,
+        owner: client.application?.owner,
         type: "information",
     });
 
@@ -59,7 +59,7 @@ export default (client: Client) => {
     // Send notifications
     sendNotification({
         content: "Creating application command types collection...",
-        owner: client.application.owner,
+        owner: client.application?.owner,
         type: "information",
     });
 
@@ -106,7 +106,7 @@ export default (client: Client) => {
     // Send notifications
     sendNotification({
         content: "Importing message component type collection...",
-        owner: client.application.owner,
+        owner: client.application?.owner,
         type: "information",
     });
 
@@ -148,7 +148,7 @@ export default (client: Client) => {
     // Send notifications
     sendNotification({
         content: "Creating application commands collection...",
-        owner: client.application.owner,
+        owner: client.application?.owner,
         type: "information",
     });
 
@@ -190,7 +190,7 @@ export default (client: Client) => {
     // Send notifications
     sendNotification({
         content: "Creating components collection...",
-        owner: client.application.owner,
+        owner: client.application?.owner,
         type: "information",
     });
 
@@ -254,11 +254,11 @@ export default (client: Client) => {
         // Send notifications
         sendNotification({
             content: "Importing blocked users...",
-            owner: client.application.owner,
+            owner: client.application?.owner,
             type: "information",
         });
 
         // Add blocked user IDs imported from file
-        blockedUsers.push(require("../resources/blockedUsers.json"));
+        blockedUsers.push(...require("../resources/blockedUsers.json"));
     }
 };

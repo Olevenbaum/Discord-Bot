@@ -13,7 +13,7 @@ import {
 /**
  * Application command interaction handler
  */
-export const applicationCommandInteraction: SavedInteractionType = {
+const applicationCommandInteraction: SavedInteractionType = {
     type: InteractionType.ApplicationCommand,
 
     async execute(
@@ -51,6 +51,7 @@ export const applicationCommandInteraction: SavedInteractionType = {
                             interaction,
                         },
                     );
+                    // TODO: Interaction Error Response
                 });
         } else {
             // Send notifications
@@ -68,6 +69,9 @@ export const applicationCommandInteraction: SavedInteractionType = {
                     interaction,
                 },
             );
+            // TODO: Interaction Error Response
         }
     },
 };
+
+export default applicationCommandInteraction;

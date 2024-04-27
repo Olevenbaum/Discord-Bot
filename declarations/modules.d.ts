@@ -23,7 +23,7 @@ declare module "configuration.json" {
         /**
          * Whether the next available bot should be started when token gets refused
          */
-        enableApplicationIteration?: boolean;
+        enableBotIteration?: boolean;
 
         /**
          * Whether the list of IDs of blocked users should be active
@@ -79,8 +79,8 @@ declare module "configuration.json" {
     /**
      * Configuration data
      */
-    const configuration: Configuration;
+    const configuration: Configuration = require("../configuration.json");
 
     // Export module data
-    export = configuration;
+    export default configuration;
 }

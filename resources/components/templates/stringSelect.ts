@@ -10,7 +10,7 @@ export const stringSelectComponent: SavedStringSelectComponent = {
     options: [],
     type: ComponentType.StringSelect,
 
-    create(options) {
+    create(options = {}) {
         // Return string select component
         return new StringSelectMenuBuilder()
             .setCustomId(this.name + (options.customIdIndex ?? ""))

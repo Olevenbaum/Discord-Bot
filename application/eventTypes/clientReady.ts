@@ -16,17 +16,14 @@ export const eventType: SavedEventType = {
         // Check if client is ready
         if (client.isReady()) {
             // Send notifications
-            sendNotification(
-                {
-                    consoleOutput: `Successfully logged in bot at Discord with username '${client.user.username}'`,
-                    content: `Your bot ${userMention(
-                        client.user.id,
-                    )} is online now!`,
-                    owner: client.application.owner,
-                    type: "information",
-                },
-                null,
-            );
+            sendNotification({
+                consoleOutput: `Successfully logged in bot at Discord with username '${client.user.username}'`,
+                content: `Your bot ${userMention(
+                    client.user.id,
+                )} is online now!`,
+                owner: client.application.owner,
+                type: "information",
+            });
         }
     },
 };

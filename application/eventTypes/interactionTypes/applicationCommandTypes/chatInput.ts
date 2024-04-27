@@ -21,28 +21,41 @@ export const chatInputCommandInteraction: SavedApplicationCommandType = {
          */
         const chatInputCommand = applicationCommands.get(
             interaction.commandName + `(${this.type})`,
-        ) as SavedChatInputCommand;
+        ) as SavedChatInputCommand | undefined;
 
-        // Try to forward chat input command interaction response prompt
-        await chatInputCommand
-            .execute(interaction)
-            .catch(async (error: Error) => {
-                // Send notifications
-                sendNotification(
-                    {
-                        consoleOutput: `Error handling interaction with chat input command '${interaction.commandName}'`,
-                        content: `There was an error handling the interaction with the chat input command \`\`${interaction.commandName}\`\`!`,
-                        error,
-                        interaction,
-                        owner: interaction.client.application.owner,
-                        type: "error",
-                    },
-                    {
-                        content:
-                            PredefinedInteractionErrorResponse.errorHandlingInteraction,
-                        interaction,
-                    },
-                );
+        // Check if chat input command was found
+        if (chatInputCommand) {
+            // Try to forward chat input command interaction response prompt
+            await chatInputCommand
+                .execute(interaction)
+                .catch(async (error: Error) => {
+                    // Send notifications
+                    sendNotification(
+                        {
+                            consoleOutput: `Error handling interaction with chat input command '${interaction.commandName}'`,
+                            content: `There was an error handling the interaction with the chat input command \`\`${interaction.commandName}\`\`!`,
+                            error,
+                            interaction,
+                            owner: interaction.client.application.owner,
+                            type: "error",
+                        },
+                        {
+                            content:
+                                PredefinedInteractionErrorResponse.errorHandlingInteraction,
+                            interaction,
+                        },
+                    );
+                    // TODO: Interaction Error Response
+                });
+        } else {
+            sendNotification({
+                consoleOutput: `No file found for chat input command '${interaction.commandName}'`,
+                content: `The file handling the chat input command '${interaction.commandName}' does not exist!`,
+                interaction,
+                owner: interaction.client.application.owner,
+                type: "error",
             });
+            // TODO: Interaction Error Response
+        }
     },
 };

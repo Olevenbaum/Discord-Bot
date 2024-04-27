@@ -19,30 +19,27 @@ import configuration from "configuration.json";
  */
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+// Define global functions
+require("./defineFunctions.ts").default();
+
 // Send notifications
 sendNotification({
     content: "Defining global functions...",
-    owner: client.application.owner,
     type: "information",
 });
-
-// Define global functions
-require("./defineFunctions.ts");
 
 // Send notifications
 sendNotification({
     content: "Reading files...",
-    owner: client.application.owner,
     type: "information",
 });
 
 // Read files
-require("./readFiles.ts")(client);
+require("./readFiles.ts").default(client);
 
 // Send notifications
 sendNotification({
     content: "Creating event listeners...",
-    owner: client.application.owner,
     type: "information",
 });
 
@@ -80,7 +77,6 @@ eventTypeFileNames.forEach((eventTypeFileName) => {
 // Send notifications
 sendNotification({
     content: "Logging in bot at Discord...",
-    owner: client.application.owner,
     type: "information",
 });
 
@@ -101,7 +97,9 @@ if (Array.isArray(configuration.applications)) {
     /**
      * Tokens of provided bots
      */
-    const tokens = configuration.applications.map((application) => application.token);
+    const tokens = configuration.applications.map(
+        (application) => application.token,
+    );
 
     // Check if argument for different token was provided
     if (argumentIndex !== -1) {
@@ -112,8 +110,10 @@ if (Array.isArray(configuration.applications)) {
     tokens
         .asynchronousFind(async (token) => {
             // Check if token could be valid
-            if (token && token.length > 0) {
-                // TODO: Check token length and format
+            if (
+                token &&
+                /^([0-9a-z]{24})\.([0-9a-z]{6})\.([0-9a-z]{38})$/i.test(token)
+            ) {
                 // Return whether token was accepted by Discord
                 return await client
                     .login(token)
@@ -133,19 +133,20 @@ if (Array.isArray(configuration.applications)) {
                             // Send notifications
                             sendNotification({
                                 content: "Token was not accepted by Discord",
-                                owner: client.application.owner,
                                 type: "warning",
                             });
 
                             // Return boolean based on configuration
-                            return configuration.enableApplicationIteration;
+                            return typeof configuration.enableBotIteration ===
+                                "boolean"
+                                ? configuration.enableBotIteration
+                                : false;
                         } else {
                             // Send notifications
                             sendNotification({
                                 content:
                                     "Something went wrong trying to log in your bot",
                                 error,
-                                owner: client.application.owner,
                                 type: "error",
                             });
 
@@ -158,19 +159,19 @@ if (Array.isArray(configuration.applications)) {
             // Send notifications
             sendNotification({
                 content: "Token does not meet the requirements",
-                owner: client.application.owner,
                 type: "warning",
             });
 
             // Return boolean based on configuration
-            return configuration.enableApplicationIteration;
+            return typeof configuration.enableBotIteration === "boolean"
+                ? configuration.enableBotIteration
+                : false;
         })
         .catch((error: Error) => {
             // Send notifications
             sendNotification({
                 content: "Something went wrong trying to log in your bot",
                 error,
-                owner: client.application.owner,
                 type: "error",
             });
         });
@@ -181,7 +182,6 @@ if (Array.isArray(configuration.applications)) {
         sendNotification({
             content: "Something went wrong trying to log in your bot",
             error,
-            owner: client.application.owner,
             type: "error",
         });
     });

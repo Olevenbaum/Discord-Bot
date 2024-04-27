@@ -38,6 +38,7 @@ import {
     UserSelectMenuInteraction,
     ModalBuilder,
     ModalSubmitInteraction,
+    Snowflake,
 } from "discord.js";
 
 /**
@@ -102,6 +103,16 @@ interface ComponentCreateOptions {
      */
     [key: string]: any;
 }
+
+/**
+ * Range from 0 to given number
+ */
+type Enumerate<
+    Number extends number,
+    Accumulator extends number[] = [],
+> = Accumulator["length"] extends Number
+    ? Accumulator[number]
+    : Enumerate<Number, [...Accumulator, Accumulator["length"]]>;
 
 /**
  * Interaction error response that is sent to the interaction creator whenever the interaction cannot be responded to as
@@ -177,18 +188,26 @@ interface Notification {
     /**
      * The owner of the bot application
      */
-    owner?: User | Team;
+    owner?: User | Team | null;
 
     /**
      * Priority of the notification
      */
-    priority?: number; // TODO: Type should be range (0 to 5)
+    priority?: Range<0, 5>;
 
     /**
      * The type of the notification
      */
     type: "error" | "information" | "warning";
 }
+
+/**
+ * Range of numbers between the given numbers
+ */
+type Range<Minimum extends number, Maximum extends number> = Exclude<
+    Enumerate<Minimum>,
+    Enumerate<Maximum>
+>;
 
 /**
  * Options that can be passed when creating a role select component
@@ -485,7 +504,7 @@ interface SavedMessageComponent extends SavedComponent {
      *
      * @param interaction The message component interaction to response to
      */
-    execute?(interaction: MessageComponentInteraction): Promise<void>;
+    execute(interaction: MessageComponentInteraction): Promise<void>;
 }
 
 /**
@@ -559,7 +578,7 @@ interface SavedRoleSelectComponent extends SavedMessageComponent {
      *
      * @param interaction The role select component interaction to response to
      */
-    execute?(interaction: RoleSelectMenuInteraction): Promise<void>;
+    execute(interaction: RoleSelectMenuInteraction): Promise<void>;
 }
 
 /**
@@ -592,7 +611,7 @@ interface SavedStringSelectComponent extends SavedMessageComponent {
      *
      * @param interaction The string select component interaction to response to
      */
-    execute?(interaction: StringSelectMenuInteraction): Promise<void>;
+    execute(interaction: StringSelectMenuInteraction): Promise<void>;
 }
 
 /**
@@ -659,7 +678,7 @@ interface SavedUserSelectComponent extends SavedMessageComponent {
      *
      * @param interaction The user select component interaction to response to
      */
-    execute?(interaction: UserSelectMenuInteraction): Promise<void>;
+    execute(interaction: UserSelectMenuInteraction): Promise<void>;
 }
 
 /**
@@ -732,6 +751,43 @@ interface TextInputComponentCreateOptions extends ComponentCreateOptions {
      */
     value?: string;
 }
+
+/**
+ * Format of application command registered and saved ones can be transformed into to compare them
+ */
+interface TransformedApplicationCommand {
+    /**
+     *
+     */
+    default_member_permissions: string;
+    /**
+     * Description of the application command
+     */
+    description: string;
+    /**
+     * Whether the application command can be used in direct messages
+     */
+    dm_permission?: boolean;
+    /**
+     * ID of the guild the application command can be used in
+     */
+    guild_id: Snowflake | null;
+    /**
+     * Name of the application command
+     */
+    name: string;
+    /**
+     * Name variations for different locations of the application command
+     */
+    name_localisations?: { [key: string]: string };
+    options: TransformedApplicationCommandOptions;
+    type: ApplicationCommandType;
+}
+
+/**
+ * Format of application command options registered and saved ones can be transformed into to compare them
+ */
+interface TransformedApplicationCommandOptions {}
 
 /**
  * Options that can be passed when creating a user select component

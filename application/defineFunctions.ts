@@ -4,7 +4,12 @@ import {
     ApplicationCommandOptionType,
     User,
 } from "discord.js";
-import { InteractionErrorResponse, Notification } from "../declarations/types";
+import {
+    InteractionErrorResponse,
+    Notification,
+    TransformedApplicationCommand,
+    TransformedApplicationCommandOptions,
+} from "../declarations/types";
 
 // Configuration data import
 import configuration from "configuration.json";
@@ -45,15 +50,15 @@ export default () => {
         counter: number = 1,
         reverse: boolean = false,
     ): Element[] {
-        // Reduce counter
+        // Decrease counter
         counter %= this.length;
 
         // Check if direction is reversed
         if (reverse) {
-            // Rotate array clockwise
+            // Rotate array "clockwise"
             this.push(...this.splice(0, this.length - counter));
         } else {
-            // Rotate array counterclockwise
+            // Rotate array "counterclockwise"
             this.unshift(...this.splice(counter, this.length));
         }
 
@@ -87,47 +92,59 @@ export default () => {
         /**
          * Registered application command with sorted and formatted structure
          */
-        const overwrittenRegisteredApplicationCommand = Object.fromEntries(
+        const transformedRegisteredApplicationCommand = Object.fromEntries(
             commonKeys.map((key) => {
                 // Differentiate between specific keys
                 switch (key) {
                     case "descriptionLocalizations" || "nameLocalizations":
                         /**
-                         * Value of the value key pair of the registered application command
+                         * Value of the key-value pair of the registered application command
                          */
                         const value = registeredApplicationCommand[key];
 
-                        /**
-                         * All keys of the registered application command in alphabetically sorted order
-                         */
-                        const keys = Object.keys(value).sort();
+                        // Check if value exists
+                        if (value) {
+                            /**
+                             * All keys of the registered application commands sorted alphabetically
+                             */
+                            const keys = Object.keys(value).sort();
 
-                        // Return key-value pair
-                        return [
-                            key,
-                            Object.fromEntries(
-                                keys.map((key) => [key, value[key]]),
-                            ),
-                        ];
+                            // Return key-value pair
+                            return [
+                                key,
+                                Object.fromEntries(
+                                    keys.map((innerKey) => [
+                                        key,
+                                        value[innerKey],
+                                    ]),
+                                ),
+                            ];
+                        } else {
+                            // Return key-value pair
+                            return [key, value];
+                        }
 
                     case "options":
                         // Return transformed application command's options
-                        return transformApplicationCommandOptions(
-                            registeredApplicationCommand[key],
-                            true,
-                        );
+                        return [
+                            key,
+                            transformApplicationCommandOptions(
+                                registeredApplicationCommand[key],
+                                true,
+                            ),
+                        ];
 
                     default:
                         // Return key-value pair
                         return [key, registeredApplicationCommand[key]];
                 }
             }),
-        );
+        ) as TransformedApplicationCommand;
 
         /**
          * Saved application command with sorted and formatted structure
          */
-        const overwrittenSavedApplicationCommand = Object.fromEntries(
+        const transformedSavedApplicationCommand = Object.fromEntries(
             commonKeys.map((key) => {
                 // Differentiate between specific keys
                 switch (key) {
@@ -146,15 +163,18 @@ export default () => {
                         return [
                             key,
                             Object.fromEntries(
-                                keys.map((key) => [key, value[key]]),
+                                keys.map((innerKey) => [key, value[innerKey]]),
                             ),
                         ];
 
                     case "options":
                         // Return transformed application command's options
-                        return transformApplicationCommandOptions(
-                            savedApplicationCommand.data[key],
-                        );
+                        return [
+                            key,
+                            transformApplicationCommandOptions(
+                                savedApplicationCommand.data[key],
+                            ),
+                        ];
 
                     default:
                         // Return key-value pair
@@ -165,12 +185,12 @@ export default () => {
                         ];
                 }
             }),
-        );
+        ) as TransformedApplicationCommand;
 
         // Return whether the application commands are identical
         return (
-            JSON.stringify(overwrittenRegisteredApplicationCommand) ===
-            JSON.stringify(overwrittenSavedApplicationCommand)
+            JSON.stringify(transformedRegisteredApplicationCommand) ===
+            JSON.stringify(transformedSavedApplicationCommand)
         );
     };
 
@@ -198,7 +218,7 @@ export default () => {
         // Check if notification was provided
         if (notification) {
             // Differentiate between types of notification
-            switch (notification.type) {
+            switch (notification.type.toLowerCase()) {
                 case "error":
                     // Print error message
                     console.error(
@@ -252,7 +272,7 @@ export default () => {
                     const users =
                         notification.owner instanceof User
                             ? [notification.owner]
-                            : notification.owner.members
+                            : notification.owner?.members
                                   .filter(
                                       (teamMember) =>
                                           typeof configuration.notifications ===
@@ -321,197 +341,189 @@ export default () => {
         const defaultOptionValues = { required: false };
 
         // Return transformed application command's options
-        return [
-            "options",
-            applicationCommandOptions.map((option) => {
-                /**
-                 * Keys of the application command option that have a defined value
-                 */
-                const keys = Object.keys(option).filter(
-                    (key) => typeof option[key] !== "undefined",
-                );
+        return applicationCommandOptions.map((option) => {
+            /**
+             * Keys of the application command option that have a defined value
+             */
+            const keys = Object.keys(option).filter(
+                (key) => typeof option[key] !== "undefined",
+            );
 
-                // Compare option type
-                if (
-                    option.type > ApplicationCommandOptionType.SubcommandGroup
-                ) {
-                    // Iterate over keys of default options
-                    Object.keys(defaultOptionValues).forEach((key) => {
-                        // Check if key is included in keys
-                        if (!keys.includes(key)) {
-                            // Add key to keys
-                            keys.push(key);
-                        }
-                    });
-                }
+            // Compare option type
+            if (option.type > ApplicationCommandOptionType.SubcommandGroup) {
+                // Iterate over keys of default options
+                Object.keys(defaultOptionValues).forEach((key) => {
+                    // Check if key is included in keys
+                    if (!keys.includes(key)) {
+                        // Add key to keys
+                        keys.push(key);
+                    }
+                });
+            }
 
-                // Check if keys contain key "type"
-                if (!keys.includes("type")) {
-                    // Add key "type" to keys
-                    keys.push("type");
-                }
+            // Check if keys contain key "type"
+            if (!keys.includes("type")) {
+                // Add key "type" to keys
+                keys.push("type");
+            }
 
-                // Sort keys
-                keys.sort();
+            // Sort keys
+            keys.sort();
 
-                // Return application command's options
-                return Object.fromEntries(
-                    keys.map((key) => {
-                        // Differentiate between specific keys
-                        switch (key) {
-                            case "channel_types":
-                                // Return sorted channel types
-                                return [key, option[key].sort()];
+            // Return application command's options
+            return Object.fromEntries(
+                keys.map((key) => {
+                    // Differentiate between specific keys
+                    switch (key) {
+                        case "channel_types":
+                            // Return sorted channel types
+                            return [key, option[key].sort()];
 
-                            case "choices":
-                                // Return choices
-                                return [
-                                    key,
-                                    option[key].map(
-                                        (choice: {
-                                            name: string;
-                                            name_localizations?: {
-                                                [key: string]: string;
-                                            };
-                                            value: string | number;
-                                        }) => {
-                                            /**
-                                             * Keys of choice option
-                                             */
-                                            const keys =
-                                                Object.keys(choice).sort();
+                        case "choices":
+                            // Return choices
+                            return [
+                                key,
+                                option[key].map(
+                                    (choice: {
+                                        name: string;
+                                        name_localizations?: {
+                                            [key: string]: string;
+                                        };
+                                        value: string | number;
+                                    }) => {
+                                        /**
+                                         * Keys of choice option
+                                         */
+                                        const keys = Object.keys(choice).sort();
 
-                                            // Return choice
-                                            return Object.fromEntries(
-                                                keys.map((key) => {
-                                                    // Differentiate between specific key
-                                                    switch (key) {
-                                                        case "name_localization":
-                                                            /**
-                                                             * Value of the key value pair of the application command option
-                                                             */
-                                                            const value =
-                                                                choice[key];
+                                        // Return choice
+                                        return Object.fromEntries(
+                                            keys.map((key) => {
+                                                // Differentiate between specific key
+                                                switch (key) {
+                                                    case "name_localizations":
+                                                        /**
+                                                         * Value of the key value pair of the application command option
+                                                         */
+                                                        const value =
+                                                            choice[key];
 
-                                                            /**
-                                                             * Sorted keys of the application command option
-                                                             */
-                                                            const keys =
-                                                                Object.keys(
-                                                                    value,
-                                                                ).sort();
+                                                        /**
+                                                         * Sorted keys of the application command option
+                                                         */
+                                                        const keys =
+                                                            Object.keys(
+                                                                value,
+                                                            ).sort();
 
-                                                            // Return name localization
-                                                            return [
-                                                                key,
-                                                                Object.fromEntries(
-                                                                    keys.map(
-                                                                        (
-                                                                            key,
-                                                                        ) => [
-                                                                            key,
-                                                                            value[
-                                                                                key
-                                                                            ],
+                                                        // Return name localization
+                                                        return [
+                                                            key,
+                                                            Object.fromEntries(
+                                                                keys.map(
+                                                                    (
+                                                                        innerKey,
+                                                                    ) => [
+                                                                        key,
+                                                                        value[
+                                                                            innerKey
                                                                         ],
-                                                                    ),
+                                                                    ],
                                                                 ),
-                                                            ];
+                                                            ),
+                                                        ];
 
-                                                        default:
-                                                            // Return key-value pair
-                                                            return [
-                                                                key,
-                                                                choice[key],
-                                                            ];
-                                                    }
-                                                }),
-                                            );
-                                        },
-                                    ),
-                                ];
+                                                    default:
+                                                        // Return key-value pair
+                                                        return [
+                                                            key,
+                                                            choice[key],
+                                                        ];
+                                                }
+                                            }),
+                                        );
+                                    },
+                                ),
+                            ];
 
-                            case "description_localizations" ||
-                                "name_localizations":
-                                /**
-                                 * Value of the key value pair of the application command option
-                                 */
-                                const entry: {
-                                    [key: string]: string;
-                                } = option[key];
+                        case "description_localizations" ||
+                            "name_localizations":
+                            /**
+                             * Value of the key value pair of the application command option
+                             */
+                            const entry: {
+                                [key: string]: string;
+                            } = option[key];
 
-                                /**
-                                 * Sorted keys of the application command option
-                                 */
-                                const keys = Object.keys(entry).sort();
+                            /**
+                             * Sorted keys of the application command option
+                             */
+                            const keys = Object.keys(entry).sort();
 
-                                // Return sorted localizations
-                                return [
-                                    key,
-                                    Object.fromEntries(
-                                        keys.map((key) => [key, entry[key]]),
-                                    ),
-                                ];
+                            // Return sorted localizations
+                            return [
+                                key,
+                                Object.fromEntries(
+                                    keys.map((key) => [key, entry[key]]),
+                                ),
+                            ];
 
-                            case "options":
-                                // Return transformed application command's options
-                                return transformApplicationCommandOptions(
-                                    option[key],
-                                    registered,
-                                );
+                        case "options":
+                            // Return transformed application command's options
+                            return transformApplicationCommandOptions(
+                                option[key],
+                                registered,
+                            );
 
-                            case "type":
-                                // Check if value of key exists
-                                if (option[key]) {
-                                    // Return type
-                                    return [key, option[key]];
-                                } else {
-                                    // Check if any option has options
+                        case "type":
+                            // Check if value of key exists
+                            if (option[key]) {
+                                // Return type
+                                return [key, option[key]];
+                            } else {
+                                // Check if any option has options
+                                if (Object.keys(option).includes("options")) {
+                                    // Check if any option has the value "type"
                                     if (
-                                        Object.keys(option).includes("options")
+                                        option["options"].some(
+                                            (
+                                                option: ApplicationCommandOption,
+                                            ) =>
+                                                Object.keys(option).includes(
+                                                    key,
+                                                ),
+                                        )
                                     ) {
-                                        // Check if any option has the value "type"
-                                        if (
-                                            option["options"].some(
-                                                (
-                                                    option: ApplicationCommandOption,
-                                                ) =>
-                                                    Object.keys(
-                                                        option,
-                                                    ).includes(key),
-                                            )
-                                        ) {
-                                            // Return type
-                                            return [
-                                                key,
-                                                ApplicationCommandOptionType.Subcommand,
-                                            ];
-                                        } else {
-                                            // Return type
-                                            return [
-                                                key,
-                                                ApplicationCommandOptionType.SubcommandGroup,
-                                            ];
-                                        }
-                                    } else {
                                         // Return type
                                         return [
                                             key,
                                             ApplicationCommandOptionType.Subcommand,
                                         ];
+                                    } else {
+                                        // Return type
+                                        return [
+                                            key,
+                                            ApplicationCommandOptionType.SubcommandGroup,
+                                        ];
                                     }
+                                } else {
+                                    // Return type
+                                    return [
+                                        key,
+                                        ApplicationCommandOptionType.Subcommand,
+                                    ];
                                 }
+                            }
 
-                            default:
-                                // Return key-value pair
-                                return [
-                                    key,
-                                    option[key] ?? defaultOptionValues[key],
-                                ];
-                        }
-                    }),
-                );
-            }),
-        ];
+                        default:
+                            // Return key-value pair
+                            return [
+                                key,
+                                option[key] ?? defaultOptionValues[key],
+                            ];
+                    }
+                }),
+            );
+        }) as TransformedApplicationCommandOptions;
     };
 };
