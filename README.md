@@ -18,8 +18,8 @@ The file should be orientated at the following format:
         ]
     }
 
-Feel free to make changes whereever you want and modify this template to make it fit your bot application. If you want to publish an aplication based on this template, make sure to read the license. Please do not hesitate using this template nevertheless, that is what it is for. The license just makes sure that commercial applications based on this template cannot claim these scripts as theirs.
-If there are any errors while executing the scripts, please contact me or create an issue and i will try to fix it. I always want this template to work best since i also work on some bots based on it.
+Feel free to make changes wherever you want and modify this template to make it fit your bot application. If you want to publish an application based on this template, make sure to read the license. Please do not hesitate using this template nevertheless, that is what it is for. The license just makes sure that commercial applications based on this template cannot claim these scripts as theirs.
+If there are any errors while executing the scripts, please contact me or create an issue and I will try to fix it. I always want this template to work best since I also work on some bots based on it.
 
 To control the application commands manually you can use the scripts in the directory `management`. The script `resetApplicationCommands.js` will unregister all application commands to then register them again.
 
